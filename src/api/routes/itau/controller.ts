@@ -3,8 +3,8 @@ import { OpenAPI } from 'routing-controllers-openapi'
 import { CreateBradescoChargeRequest, GetChargesQuery } from './request'
 import { authenticateTokenBradesco, createCharge, findMany, findOne } from './service'
 
-@JsonController('/bradesco/cobranca')
-export class BradescoController {
+@JsonController('/itau/cobranca')
+export class ItauController {
   @Get('?:inicio')
   @OpenAPI({ summary: 'Retorna a lista de todas as cobranças geradas' })
   @HttpCode(200)

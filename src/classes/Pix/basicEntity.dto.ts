@@ -1,13 +1,12 @@
 import { IsDate, IsNotEmpty, IsNumber, IsNumberString, IsOptional, IsString, ValidateNested } from 'class-validator'
-import { BasicCalendar, BasicCreateChargeRequest, BasicDebtor, BasicGetChargesQuery, BasicValue } from '~/classes/Pix/basicEntity.dto'
 
-export class Calendar extends BasicCalendar {
+export class BasicCalendar {
   @IsNotEmpty()
   @IsNumber()
   expiracao: number
 }
 
-export class Debtor extends BasicDebtor {
+export class BasicDebtor {
   @IsString()
   @IsOptional()
   cnpj?: string
@@ -21,13 +20,13 @@ export class Debtor extends BasicDebtor {
   nome: string
 }
 
-export class Value extends BasicValue {
+export class BasicValue {
   @IsNotEmpty()
   @IsNumberString()
   original: string
 }
 
-export class GetChargesQuery extends BasicGetChargesQuery {
+export class BasicGetChargesQuery {
   @IsDate()
   @IsNotEmpty()
   inicio: Date
@@ -38,14 +37,14 @@ export class GetChargesQuery extends BasicGetChargesQuery {
   fim?: Date
 }
 
-export class CreateBradescoChargeRequest extends BasicCreateChargeRequest {
+export class BasicCreateChargeRequest {
   @IsOptional()
   @ValidateNested()
-  calendario: Calendar
+  calendario: BasicCalendar
 
   @IsOptional()
   @ValidateNested()
-  devedor: Debtor
+  devedor: BasicDebtor
 
   @IsNotEmpty()
   @IsString()
@@ -53,7 +52,7 @@ export class CreateBradescoChargeRequest extends BasicCreateChargeRequest {
 
   @IsNotEmpty()
   @ValidateNested()
-  valor: Value
+  valor: BasicValue
 
   @IsOptional()
   @IsString()
