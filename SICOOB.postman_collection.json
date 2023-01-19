@@ -1,0 +1,189 @@
+{
+	"info": {
+		"_postman_id": "2563569a-2b06-44ad-ac32-afce6c0029f2",
+		"name": "SICOOB",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "16328596"
+	},
+	"item": [
+		{
+			"name": "Token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Set access-token\", () => {\r",
+							"    pm.collectionVariables.set(\"access_token\", pm.response.json().access_token);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Basic ZXlKcFpDSTZJbVZtT0RrMk5qWXRPU0lzSW1OdlpHbG5iMUIxWW14cFkyRmtiM0lpT2pBc0ltTnZaR2xuYjFOdlpuUjNZWEpsSWpvME5EYzJOeXdpYzJWeGRXVnVZMmxoYkVsdWMzUmhiR0ZqWVc4aU9qRjk6ZXlKcFpDSTZJakEwTlRBMU5tVXRZVFJsWlMwME1qUmpMVGxoT0RrdE1ESXdOREprTlRVM01EWWlMQ0pqYjJScFoyOVFkV0pzYVdOaFpHOXlJam93TENKamIyUnBaMjlUYjJaMGQyRnlaU0k2TkRRM05qY3NJbk5sY1hWbGJtTnBZV3hKYm5OMFlXeGhZMkZ2SWpveExDSnpaWEYxWlc1amFXRnNRM0psWkdWdVkybGhiQ0k2TVN3aVlXMWlhV1Z1ZEdVaU9pSm9iMjF2Ykc5bllXTmhieUlzSW1saGRDSTZNVFkyTXprMU9EWTNPRFkwTkgw",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"type": "text"
+					},
+					{
+						"key": "clientID",
+						"value": "23ec2d9b-a9f1-46b7-b7a6-77f7f2bda838",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "localhost:4000/sicoob/token",
+					"host": [
+						"localhost"
+					],
+					"port": "4000",
+					"path": [
+						"sicoob",
+						"token"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CREATE PIX",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Set access-token\", () => {\r",
+							"    pm.collectionVariables.set(\"txid\", pm.response.json().txid);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\r\n  \"valor\": {\r\n    \"original\": \"37.00\",\r\n    \"modalidadeAlteracao\": 1\r\n  },\r\n  \"chave\": \"05697478000136\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:4000/sicoob/cobranca",
+					"host": [
+						"localhost"
+					],
+					"port": "4000",
+					"path": [
+						"sicoob",
+						"cobranca"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET PIX",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:4000/sicoob/cobranca/{{txid}}",
+					"host": [
+						"localhost"
+					],
+					"port": "4000",
+					"path": [
+						"sicoob",
+						"cobranca",
+						"{{txid}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET PIX LIST",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:4000/sicoob/cobranca/{{txid}}?inicio=2020-04-01T00:00:00Z&fim=2020-04-01T17:00:00Z",
+					"host": [
+						"localhost"
+					],
+					"port": "4000",
+					"path": [
+						"sicoob",
+						"cobranca",
+						"{{txid}}"
+					],
+					"query": [
+						{
+							"key": "inicio",
+							"value": "2020-04-01T00:00:00Z"
+						},
+						{
+							"key": "fim",
+							"value": "2020-04-01T17:00:00Z"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{access_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "access_token",
+			"value": ""
+		},
+		{
+			"key": "txid",
+			"value": ""
+		}
+	]
+}
