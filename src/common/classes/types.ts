@@ -46,7 +46,7 @@ export interface Valor {
 /**
  * Object returned from Bradesco API
  */
-export interface BradescoRetorno {
+export interface BasicReturn {
   txid: string
   location: string
   revisao: number

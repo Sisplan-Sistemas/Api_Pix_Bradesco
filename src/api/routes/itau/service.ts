@@ -5,10 +5,10 @@ import path from 'path'
 import https from 'https'
 
 import { BRADESCO_CERT, BRADESCO_ENDPOINT } from '~/config/env'
-import { BradescoRetorno, ClientInfo } from '~/classes/types'
-import { CreateBradescoChargeRequest, GetChargesQuery } from './request'
+import { BasicReturn, ClientInfo } from '~/common/classes/types'
 import { logger } from '~/common/logger'
-import { RequisitionFailedError, ValidationError } from '~/classes/error'
+import { RequisitionFailedError, ValidationError } from '~/common/classes/error'
+import { BasicCreateChargeRequest, BasicGetChargesQuery } from '../../../common/classes/Pix/basicEntity.dto'
 
 export const getAgent = () => {
   if (!BRADESCO_CERT) throw new Error('Certificate not found')
@@ -20,7 +20,7 @@ export const getAgent = () => {
   return agent
 }
 
-export const createCharge = async (token: string, payload: CreateBradescoChargeRequest): Promise<BradescoRetorno> => {
+export const createCharge = async (token: string, payload: BasicCreateChargeRequest): Promise<BasicReturn> => {
   try {
     const response = await axios({
       method: 'POST',
@@ -93,7 +93,7 @@ export const findOne = async (token: string, identifier: string) => {
   }
 }
 
-export const findMany = async (token: string, queryParams: GetChargesQuery) => {
+export const findMany = async (token: string, queryParams: BasicGetChargesQuery) => {
   try {
     const response = await axios({
       method: 'GET',

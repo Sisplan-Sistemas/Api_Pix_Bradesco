@@ -11,6 +11,6 @@ export class HealthCheckController {
   @HttpCode(200)
   @OnUndefined(200)
   get() {
-    return 'ta funcionando'
+    return 'Welcome to PIX API'
   }
 }

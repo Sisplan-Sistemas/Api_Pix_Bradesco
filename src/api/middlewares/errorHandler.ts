@@ -4,6 +4,7 @@ import { logger } from '~/common/logger'
 
 @Middleware({ type: 'after' })
 export class ErrorHandler implements ExpressErrorMiddlewareInterface {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   error(error: any, request: Request, response: Response, next: NextFunction) {
     /**
      * Status 500 is to guarantee that uncaught errors are not going to return success statuses.
