@@ -1,33 +1,35 @@
-import axios, { AxiosError } from 'axios'
+import axios, { AxiosError, AxiosResponse } from 'axios'
 import fs from 'fs'
 import qs from 'qs'
 import path from 'path'
 import https from 'https'
 
-import { BRADESCO_CERT, BRADESCO_ENDPOINT } from '~/config/env'
-import { BasicReturn, ClientInfo } from '~/common/classes/types'
+import { SICOOB_AUTH_ENDPOINT, SICOOB_CERT, SICOOB_CERT_PASSPHRASE, SICOOB_ENDPOINT } from '~/config/env'
+import { BasicReturn } from '~/common/classes/types'
 import { logger } from '~/common/logger'
 import { RequisitionFailedError, ValidationError } from '~/common/classes/error'
 import { BasicCreateChargeRequest, BasicGetChargesQuery } from '../../../common/classes/Pix/basicEntity.dto'
+import { Agent } from 'http'
 
-export const getAgent = () => {
-  if (!BRADESCO_CERT) throw new Error('Certificate not found')
+export const getAgent: () => Agent = () => {
+  if (!SICOOB_CERT) throw new Error('Certificate not found')
 
-  const certPath = path.join(__dirname, '..', '..', '..', '..', 'certs', BRADESCO_CERT)
+  const certPath = path.join(__dirname, '..', '..', '..', '..', 'certs', SICOOB_CERT)
   const cert = fs.readFileSync(certPath)
-  const agent = new https.Agent({ pfx: cert, passphrase: '1234' })
+  const agent = new https.Agent({ pfx: cert, passphrase: SICOOB_CERT_PASSPHRASE })
 
   return agent
 }
 
 export const createCharge = async (token: string, payload: BasicCreateChargeRequest): Promise<BasicReturn> => {
   try {
+    if (!payload.calendario) payload.calendario = { expiracao: 7200 }
+
     const response = await axios({
       method: 'POST',
-      url: `https://qrpix-h.bradesco.com.br/v2/cob-emv`,
+      url: `${SICOOB_ENDPOINT}/cob`,
       headers: {
-        Authorization: token,
-        'Content-Type': 'application/json'
+        Authorization: token
       },
       httpsAgent: getAgent(),
       data: payload
@@ -44,20 +46,20 @@ export const createCharge = async (token: string, payload: BasicCreateChargeRequ
   }
 }
 
-export const authenticate = async ({ clientID, clientSecret }: ClientInfo) => {
-  const credentials = Buffer.from(`${clientID}:${clientSecret}`).toString('base64')
-
+export const authenticate = async (clientID: string): Promise<string> => {
   try {
-    const response = await axios({
+    const response: AxiosResponse<string> = await axios({
       method: 'POST',
-      url: `${BRADESCO_ENDPOINT}/oauth/token`,
+      url: SICOOB_AUTH_ENDPOINT,
       headers: {
-        Authorization: `Basic ${credentials}`,
         'Content-Type': 'application/x-www-form-urlencoded'
       },
       httpsAgent: getAgent(),
       data: qs.stringify({
-        grant_type: 'client_credentials'
+        grant_type: 'client_credentials',
+        client_id: clientID,
+        scope:
+          'cob.read cob.write cobv.write cobv.read lotecobv.write lotecobv.read pix.write pix.read webhook.read webhook.write payloadlocation.write payloadlocation.read'
       })
     })
 
@@ -74,7 +76,7 @@ export const findOne = async (token: string, identifier: string) => {
   try {
     const response = await axios({
       method: 'GET',
-      url: `${BRADESCO_ENDPOINT}/v2/cob/${identifier}`,
+      url: `${SICOOB_ENDPOINT}/cob/${identifier}`,
       headers: {
         Authorization: token
       },
@@ -97,7 +99,7 @@ export const findMany = async (token: string, queryParams: BasicGetChargesQuery)
   try {
     const response = await axios({
       method: 'GET',
-      url: `${BRADESCO_ENDPOINT}/v2/cob`,
+      url: `${SICOOB_ENDPOINT}/cob`,
       headers: {
         Authorization: token
       },

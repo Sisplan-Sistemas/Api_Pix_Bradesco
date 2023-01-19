@@ -1,6 +1,6 @@
 import { Body, Get, HeaderParam, HttpCode, JsonController, OnUndefined, Param, Post, QueryParams } from 'routing-controllers'
 import { OpenAPI } from 'routing-controllers-openapi'
-import { authenticateTokenBradesco, createCharge, findMany, findOne } from './service'
+import { authenticate, createCharge, findMany, findOne } from './service'
 import { BasicCreateChargeRequest, BasicGetChargesQuery } from '../../../common/classes/Pix/basicEntity.dto'
 
 @JsonController('/itau/cobranca')
@@ -34,6 +34,6 @@ export class ItauController {
   @HttpCode(200)
   @OnUndefined(500)
   getToken(@HeaderParam('clientID') clientID: string, @HeaderParam('clientSecret') clientSecret: string) {
-    return authenticateTokenBradesco({ clientID, clientSecret })
+    return authenticate({ clientID, clientSecret })
   }
 }

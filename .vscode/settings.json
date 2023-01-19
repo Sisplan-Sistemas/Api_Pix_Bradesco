@@ -1,5 +1,16 @@
 {
-  "cSpell.words": ["combinate", "datamodel", "dmmf", "Doee", "Metadatas", "middlewares", "MIDDLEWARES", "openapi", "solicitacao"],
+  "cSpell.words": [
+    "combinate",
+    "datamodel",
+    "dmmf",
+    "Doee",
+    "Metadatas",
+    "middlewares",
+    "MIDDLEWARES",
+    "openapi",
+    "SICOOB",
+    "solicitacao"
+  ],
   "cSpell.language": "en,pt_BR",
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {

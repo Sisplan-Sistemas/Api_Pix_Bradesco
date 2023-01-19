@@ -18,4 +18,16 @@ const fileName = (() => {
 
 config({ path: resolve(__dirname, '..', '..', fileName) })
 
-export const { PORT, BRADESCO_ENDPOINT, BRADESCO_CERT } = process.env
+export const {
+  PORT,
+  BRADESCO_ENDPOINT,
+  BRADESCO_CERT,
+  BRADESCO_CERT_PASSPHRASE,
+  ITAU_ENDPOINT,
+  ITAU_CERT,
+  ITAU_CERT_PASSPHRASE,
+  SICOOB_ENDPOINT,
+  SICOOB_AUTH_ENDPOINT,
+  SICOOB_CERT,
+  SICOOB_CERT_PASSPHRASE
+} = process.env

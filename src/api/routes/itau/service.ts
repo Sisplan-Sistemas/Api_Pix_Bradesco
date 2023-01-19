@@ -44,7 +44,7 @@ export const createCharge = async (token: string, payload: BasicCreateChargeRequ
   }
 }
 
-export const authenticateTokenBradesco = async ({ clientID, clientSecret }: ClientInfo) => {
+export const authenticate = async ({ clientID, clientSecret }: ClientInfo) => {
   const credentials = Buffer.from(`${clientID}:${clientSecret}`).toString('base64')
 
   try {

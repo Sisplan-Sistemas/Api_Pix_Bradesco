@@ -3,9 +3,9 @@ import { OpenAPI } from 'routing-controllers-openapi'
 import { authenticate, createCharge, findMany, findOne } from './service'
 import { BasicCreateChargeRequest, BasicGetChargesQuery } from '../../../common/classes/Pix/basicEntity.dto'
 
-@JsonController('/bradesco/cobranca')
-export class BradescoController {
-  @Get('?:inicio')
+@JsonController('/sicoob')
+export class ItauController {
+  @Get('/cobranca?:inicio')
   @OpenAPI({ summary: 'Retorna a lista de todas as cobranças geradas' })
   @HttpCode(200)
   @OnUndefined(500)
@@ -13,7 +13,7 @@ export class BradescoController {
     return findMany(token, query)
   }
 
-  @Get('/:identifier')
+  @Get('/cobranca/:identifier')
   @OpenAPI({ summary: 'Retorna a cobrança pelo ID' })
   @HttpCode(200)
   @OnUndefined(500)
@@ -21,7 +21,7 @@ export class BradescoController {
     return findOne(token, identifier)
   }
 
-  @Post('')
+  @Post('/cobranca')
   @OpenAPI({ summary: 'Cria uma nova cobrança' })
   @HttpCode(200)
   @OnUndefined(500)
@@ -29,11 +29,11 @@ export class BradescoController {
     return createCharge(token, body)
   }
 
-  @Post('/bradesco/token')
+  @Post('/token')
   @OpenAPI({ summary: 'Retorna o token de acesso ao Bradesco' })
   @HttpCode(200)
   @OnUndefined(500)
-  getToken(@HeaderParam('clientID') clientID: string, @HeaderParam('clientSecret') clientSecret: string) {
-    return authenticate({ clientID, clientSecret })
+  getToken(@HeaderParam('clientID') clientID: string) {
+    return authenticate(clientID)
   }
 }
