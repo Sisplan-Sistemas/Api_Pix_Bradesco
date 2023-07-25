@@ -1,7 +1,7 @@
 import { Body, Get, HeaderParam, HttpCode, JsonController, OnUndefined, Param, Post, QueryParams } from 'routing-controllers'
 import { OpenAPI } from 'routing-controllers-openapi'
-import { authenticate, createCharge, findMany, findOne } from './service'
-import { BasicCreateChargeRequest, BasicGetChargesQuery } from '../../../common/classes/Pix/basicEntity.dto'
+import { CreateChargeRequest, GetChargesQuery } from './request'
+import { authenticateTokenItau, createCharge, findMany, findOne } from './service'
 
 @JsonController('/itau/cobranca')
 export class ItauController {
@@ -25,15 +25,17 @@ export class ItauController {
   @OpenAPI({ summary: 'Cria uma nova cobrança' })
   @HttpCode(200)
   @OnUndefined(500)
-  post(@HeaderParam('Authorization') token: string, @Body({ validate: true }) body: BasicCreateChargeRequest) {
+  post(@HeaderParam('Authorization') token: string, @Body({ validate: true }) body: CreateChargeRequest) {
     return createCharge(token, body)
   }
 
-  @Post('/bradesco/token')
-  @OpenAPI({ summary: 'Retorna o token de acesso ao Bradesco' })
+@JsonController('/itau/token')
+export class ItauTokenController {
+  @Post('')
+  @OpenAPI({ summary: 'Retorna o token de acesso ao Itau' })
   @HttpCode(200)
   @OnUndefined(500)
-  getToken(@HeaderParam('clientID') clientID: string, @HeaderParam('clientSecret') clientSecret: string) {
-    return authenticate({ clientID, clientSecret })
+  post(@HeaderParam('clientID') clientID: string, @HeaderParam('clientSecret') clientSecret: string) {
+    return authenticateTokenItau({ clientID, clientSecret })
   }
 }

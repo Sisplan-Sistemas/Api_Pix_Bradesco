@@ -1,33 +1,32 @@
 import axios, { AxiosError } from 'axios'
-import fs from 'fs'
-import qs from 'qs'
-import path from 'path'
-import https from 'https'
 
-import { BRADESCO_CERT, BRADESCO_ENDPOINT } from '~/config/env'
-import { BasicReturn, ClientInfo } from '~/common/classes/types'
+import { ITAU_ENDPOINT, ITAU_TOKEN_ENDPOINT, ITAU_CERT } from '~/config/env'
+import { PixRetorno, ClientInfo } from '~/classes/types'
+import { CreateChargeRequest, GetChargesQuery } from './request'
 import { logger } from '~/common/logger'
-import { RequisitionFailedError, ValidationError } from '~/common/classes/error'
-import { BasicCreateChargeRequest, BasicGetChargesQuery } from '../../../common/classes/Pix/basicEntity.dto'
+import { RequisitionFailedError, ValidationError } from '~/classes/error'
+import path from 'path'
+import fs from 'fs'
+import https from 'https'
+import qs from 'qs'
 
 export const getAgent = () => {
-  if (!BRADESCO_CERT) throw new Error('Certificate not found')
+  if (!ITAU_CERT) throw new Error('Certificate not found')
 
-  const certPath = path.join(__dirname, '..', '..', '..', '..', 'certs', BRADESCO_CERT)
+  const certPath = path.join(__dirname, '..', '..', '..', '..', 'certs', ITAU_CERT)
   const cert = fs.readFileSync(certPath)
-  const agent = new https.Agent({ pfx: cert, passphrase: '1234' })
+  const agent = new https.Agent({ ca: cert })
 
   return agent
 }
 
-export const createCharge = async (token: string, payload: BasicCreateChargeRequest): Promise<BasicReturn> => {
+export const createCharge = async (token: string, payload: CreateChargeRequest): Promise<PixRetorno> => {
   try {
     const response = await axios({
       method: 'POST',
-      url: `https://qrpix-h.bradesco.com.br/v2/cob-emv`,
+      url: `${ITAU_ENDPOINT}/v2/cob/`,
       headers: {
-        Authorization: token,
-        'Content-Type': 'application/json'
+        Authorization: token
       },
       httpsAgent: getAgent(),
       data: payload
@@ -44,13 +43,12 @@ export const createCharge = async (token: string, payload: BasicCreateChargeRequ
   }
 }
 
-export const authenticate = async ({ clientID, clientSecret }: ClientInfo) => {
-  const credentials = Buffer.from(`${clientID}:${clientSecret}`).toString('base64')
-
+export const authenticateTokenItau = async ({ clientID, clientSecret }: ClientInfo) => {
   try {
+    const credentials = Buffer.from(`${clientID}:${clientSecret}`).toString('base64')
     const response = await axios({
       method: 'POST',
-      url: `${BRADESCO_ENDPOINT}/oauth/token`,
+      url: `${ITAU_TOKEN_ENDPOINT}/oauth/token`,
       headers: {
         Authorization: `Basic ${credentials}`,
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -74,7 +72,7 @@ export const findOne = async (token: string, identifier: string) => {
   try {
     const response = await axios({
       method: 'GET',
-      url: `${BRADESCO_ENDPOINT}/v2/cob/${identifier}`,
+      url: `${ITAU_ENDPOINT}/v2/cob/${identifier}`,
       headers: {
         Authorization: token
       },
@@ -97,12 +95,15 @@ export const findMany = async (token: string, queryParams: BasicGetChargesQuery)
   try {
     const response = await axios({
       method: 'GET',
-      url: `${BRADESCO_ENDPOINT}/v2/cob`,
+      url: `${ITAU_ENDPOINT}/v2/cob`,
       headers: {
         Authorization: token
       },
-      params: { inicio: queryParams.inicio, fim: queryParams.fim },
-      httpsAgent: getAgent()
+      httpsAgent: getAgent(),
+      params: {
+        inicio: queryParams.inicio.toISOString().split('.')[0] + 'Z',
+        fim: queryParams.fim?.toISOString().split('.')[0] + 'Z' ?? ''
+      }
     })
 
     logger.info('Found  charges')
