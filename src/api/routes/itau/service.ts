@@ -1,14 +1,15 @@
 import axios, { AxiosError } from 'axios'
 
 import { ITAU_ENDPOINT, ITAU_TOKEN_ENDPOINT, ITAU_CERT } from '~/config/env'
-import { PixRetorno, ClientInfo } from '~/classes/types'
-import { CreateChargeRequest, GetChargesQuery } from './request'
+import { CreateChargeRequest } from './request'
 import { logger } from '~/common/logger'
-import { RequisitionFailedError, ValidationError } from '~/classes/error'
 import path from 'path'
 import fs from 'fs'
 import https from 'https'
 import qs from 'qs'
+import { BasicGetChargesQuery } from '~/common/classes/Pix/basicEntity.dto'
+import { BasicReturn, ClientInfo } from '~/common/classes/types'
+import { RequisitionFailedError, ValidationError } from '~/common/classes/error'
 
 export const getAgent = () => {
   if (!ITAU_CERT) throw new Error('Certificate not found')
@@ -20,7 +21,7 @@ export const getAgent = () => {
   return agent
 }
 
-export const createCharge = async (token: string, payload: CreateChargeRequest): Promise<PixRetorno> => {
+export const createCharge = async (token: string, payload: CreateChargeRequest): Promise<BasicReturn> => {
   try {
     const response = await axios({
       method: 'POST',

@@ -1,7 +1,8 @@
 import { Body, Get, HeaderParam, HttpCode, JsonController, OnUndefined, Param, Post, QueryParams } from 'routing-controllers'
 import { OpenAPI } from 'routing-controllers-openapi'
-import { CreateChargeRequest, GetChargesQuery } from './request'
+import { CreateChargeRequest } from './request'
 import { authenticateTokenItau, createCharge, findMany, findOne } from './service'
+import { BasicGetChargesQuery } from '~/common/classes/Pix/basicEntity.dto'
 
 @JsonController('/itau/cobranca')
 export class ItauController {
@@ -28,6 +29,7 @@ export class ItauController {
   post(@HeaderParam('Authorization') token: string, @Body({ validate: true }) body: CreateChargeRequest) {
     return createCharge(token, body)
   }
+}
 
 @JsonController('/itau/token')
 export class ItauTokenController {
