@@ -4,7 +4,7 @@ import { authenticate, createCharge, findMany, findOne } from './service'
 import { BasicCreateChargeRequest, BasicGetChargesQuery } from '../../../common/classes/Pix/basicEntity.dto'
 
 @JsonController('/ailos')
-export class ItauController {
+export class AilosController {
   @Get('/cobranca?:inicio')
   @OpenAPI({ summary: 'Retorna a lista de todas as cobranças geradas' })
   @HttpCode(200)
