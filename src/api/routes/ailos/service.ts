@@ -105,6 +105,29 @@ export const findOne = async (token: string, identifier: string) => {
   }
 }
 
+export const findQrCode = async (token: string, identifier: string) => {
+  try {
+    const response = await axios({
+      method: 'GET',
+      url: `${AILOS_ENDPOINT}/qrcode/consulta/${identifier}`,
+      headers: {
+        Authorization: token
+      },
+      httpsAgent: getAgent()
+    })
+
+    logger.info(`Found one charge with identifier ${identifier}`)
+    return response.data
+  } catch (error) {
+    const errorResponse = error as AxiosError
+
+    if (errorResponse.response?.status === 401)
+      throw new ValidationError(errorResponse.response?.data.error_description, errorResponse.response?.status)
+
+    throw new RequisitionFailedError(errorResponse.response?.data.detail, errorResponse.response?.status)
+  }
+}
+
 export const findMany = async (token: string, queryParams: BasicGetChargesQuery) => {
   try {
     const response = await axios({

@@ -1,6 +1,6 @@
 import { Body, Get, HeaderParam, HttpCode, JsonController, OnUndefined, Param, Post, QueryParams } from 'routing-controllers'
 import { OpenAPI } from 'routing-controllers-openapi'
-import { authenticate, createCharge, findMany, findOne } from './service'
+import { authenticate, createCharge, findMany, findOne, findQrCode } from './service'
 import { BasicCreateChargeRequest, BasicGetChargesQuery } from '../../../common/classes/Pix/basicEntity.dto'
 
 @JsonController('/ailos')
@@ -19,6 +19,14 @@ export class AilosController {
   @OnUndefined(500)
   getOne(@HeaderParam('Authorization') token: string, @Param('identifier') identifier: string) {
     return findOne(token, identifier)
+  }
+
+  @Get('/consulta/:identifier')
+  @OpenAPI({ summary: 'Retorna o qrCode pelo ID' })
+  @HttpCode(200)
+  @OnUndefined(500)
+  getQrCode(@HeaderParam('Authorization') token: string, @Param('identifier') identifier: string) {
+    return findQrCode(token, identifier)
   }
 
   @Post('/cobranca')
