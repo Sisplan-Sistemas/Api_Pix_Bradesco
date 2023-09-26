@@ -38,11 +38,12 @@ export const createCharge = async (token: string, payload: BasicCreateChargeRequ
     return response.data
   } catch (error) {
     const errorResponse = error as AxiosError
+    const errorMensage = errorResponse.response?.data.detail.detail == undefined ? errorResponse.response?.data.detail : errorResponse.response?.data.detail.detail;
 
     if (errorResponse.response?.status === 401)
-      throw new ValidationError(errorResponse.response?.data.error_description, errorResponse.response?.status)
+      throw new ValidationError(errorResponse.response?.data.detail, errorResponse.response?.status)
 
-    throw new RequisitionFailedError(errorResponse.response?.data.detail, errorResponse.response?.status)
+    throw new RequisitionFailedError(errorMensage, errorResponse.response?.status)
   }
 }
 
@@ -67,7 +68,6 @@ export const authenticate = async (clientID: string): Promise<string> => {
     return response.data
   } catch (error) {
     const errorResponse = error as AxiosError
-
     throw new ValidationError(errorResponse.response?.data.error_description, errorResponse.response?.status)
   }
 }
