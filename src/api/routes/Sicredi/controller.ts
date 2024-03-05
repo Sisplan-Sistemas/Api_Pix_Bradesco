@@ -3,8 +3,8 @@ import { OpenAPI } from 'routing-controllers-openapi'
 import { authenticate, createCharge, findMany, findOne } from './service'
 import { BasicCreateChargeRequest, BasicGetChargesQuery } from '../../../common/classes/Pix/basicEntity.dto'
 
-@JsonController('/sicoob')
-export class SicoobController {
+@JsonController('/sicredi')
+export class SicrediController {
   @Get('/cobranca?:inicio')
   @OpenAPI({ summary: 'Retorna a lista de todas as cobranças geradas' })
   @HttpCode(200)
@@ -30,10 +30,10 @@ export class SicoobController {
   }
 
   @Post('/token')
-  @OpenAPI({ summary: 'Retorna o token de acesso ao Sicoob' })
+  @OpenAPI({ summary: 'Retorna o token de acesso ao Sicredi' })
   @HttpCode(200)
   @OnUndefined(500)
-  getToken(@HeaderParam('clientID') clientID: string) {
-    return authenticate(clientID)
+  getToken(@HeaderParam('clientID') clientID: string, @HeaderParam('clientSecret') clientSecret: string) {
+    return authenticate(clientID, clientSecret)
   }
 }
