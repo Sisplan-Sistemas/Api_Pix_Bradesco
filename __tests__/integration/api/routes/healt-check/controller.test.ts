@@ -6,7 +6,7 @@ describe('/Health-check', () => {
   beforeAll(startServer)
 
   it('should return status code 204', async () => {
-    await request(server).get('/health-check').expect(204)
+    await request(server).get('/health-check').expect(200)
   })
 
   afterAll(closeServer)

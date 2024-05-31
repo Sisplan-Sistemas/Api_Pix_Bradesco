@@ -12,9 +12,11 @@ import { BasicReturn, ClientInfo } from '~/common/classes/types'
 import { RequisitionFailedError, ValidationError } from '~/common/classes/error'
 
 export const getAgent = () => {
+  const ITAU_CERT = process.env.ITAU_CERT
   if (!ITAU_CERT) throw new Error('Certificate not found')
 
   const certPath = path.join(__dirname, '..', '..', '..', '..', 'certs', ITAU_CERT)
+
   const cert = fs.readFileSync(certPath)
   const agent = new https.Agent({ ca: cert })
 
