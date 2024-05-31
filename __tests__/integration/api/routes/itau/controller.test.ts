@@ -25,53 +25,51 @@ interface AxiosResponse<T> {
     config: any,
 }
 
-describe('ItauController', () => {
+describe('POST /itau/token', () => {
     afterEach(() => {
         jest.clearAllMocks()
     })
 
-    describe('POST /itau/token', () => {
-        it('should return an access token', async () => {
-            const mockResponse = { access_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxZTJkNTNkZi02MTRlLTNkYTMtOTFmNC1lNjJlODBkZTBmNTIiLCJleHAiOjE3MTY5ODc1MDMsImlhdCI6MTcxNjk4NzIwMywic291cmNlIjoic3RzLXNhbmRib3giLCJlbnYiOiJQIiwiZmxvdyI6IkNDIiwic2NvcGUiOiJjYXNobWFuYWdlbWVudC1jb25zdWx0YWJvbGV0b3MtdjEtYXdzLXNjb3BlIiwidXNlcm5hbWUiOiJlZGVuaWxzb25Ac2lzcGxhbnNpc3RlbWFzLmNvbS5iciIsIm9yZ2FuaXphdGlvbk5hbWUiOiJBdXRvIENhZGFzdHJvIn0.QHfrNPZ31XQjb1qNDN9RAHiSugkpkJRYnfOh0AqmlGw' };
-            (authenticateTokenItau as jest.Mock).mockResolvedValue(mockResponse)
+    it('should return an access token', async () => {
+        const mockResponse = { access_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxZTJkNTNkZi02MTRlLTNkYTMtOTFmNC1lNjJlODBkZTBmNTIiLCJleHAiOjE3MTY5ODc1MDMsImlhdCI6MTcxNjk4NzIwMywic291cmNlIjoic3RzLXNhbmRib3giLCJlbnYiOiJQIiwiZmxvdyI6IkNDIiwic2NvcGUiOiJjYXNobWFuYWdlbWVudC1jb25zdWx0YWJvbGV0b3MtdjEtYXdzLXNjb3BlIiwidXNlcm5hbWUiOiJlZGVuaWxzb25Ac2lzcGxhbnNpc3RlbWFzLmNvbS5iciIsIm9yZ2FuaXphdGlvbk5hbWUiOiJBdXRvIENhZGFzdHJvIn0.QHfrNPZ31XQjb1qNDN9RAHiSugkpkJRYnfOh0AqmlGw' };
+        (authenticateTokenItau as jest.Mock).mockResolvedValue(mockResponse)
 
-            const response = await request(serverToken)
-                .post('/itau/token')
-                .set('clientID', 'mockClientID')
-                .set('clientSecret', 'mockClientSecret')
+        const response = await request(serverToken)
+            .post('/itau/token')
+            .set('clientID', 'mockClientID')
+            .set('clientSecret', 'mockClientSecret')
 
-            expect(response.status).toBe(200)
-            expect(response.body).toEqual(mockResponse)
-            expect(authenticateTokenItau).toHaveBeenCalledWith({
-                clientID: 'mockClientID',
-                clientSecret: 'mockClientSecret',
-            })
+        expect(response.status).toBe(200)
+        expect(response.body).toEqual(mockResponse)
+        expect(authenticateTokenItau).toHaveBeenCalledWith({
+            clientID: 'mockClientID',
+            clientSecret: 'mockClientSecret',
         })
+    })
 
-        it('should handle AxiosError', async () => {
-            const errorResponse = {
-                status: 401,
-                data: {
-                    error_description: 'Invalid credentials',
-                },
-            }
+    it('should handle AxiosError', async () => {
+        const errorResponse = {
+            status: 401,
+            data: {
+                error_description: 'Invalid credentials',
+            },
+        }
 
-            const axiosError = new Error('Request failed') as AxiosError
-            axiosError.isAxiosError = true
-            axiosError.response = errorResponse as AxiosResponse<any>;
-            (authenticateTokenItau as jest.Mock).mockRejectedValue(axiosError)
+        const axiosError = new Error('Request failed') as AxiosError
+        axiosError.isAxiosError = true
+        axiosError.response = errorResponse as AxiosResponse<any>;
+        (authenticateTokenItau as jest.Mock).mockRejectedValue(axiosError)
 
-            const response = await request(serverToken)
-                .post('/itau/token')
-                .set('clientID', 'invalidClientID')
-                .set('clientSecret', 'invalidClientSecret')
+        const response = await request(serverToken)
+            .post('/itau/token')
+            .set('clientID', 'invalidClientID')
+            .set('clientSecret', 'invalidClientSecret')
 
-            expect(response.body.response.status).toBe(401)
-            expect(response.body.response.data).toEqual({ error_description: 'Invalid credentials' })
-            expect(authenticateTokenItau).toHaveBeenCalledWith({
-                clientID: 'invalidClientID',
-                clientSecret: 'invalidClientSecret',
-            })
+        expect(response.body.response.status).toBe(401)
+        expect(response.body.response.data).toEqual({ error_description: 'Invalid credentials' })
+        expect(authenticateTokenItau).toHaveBeenCalledWith({
+            clientID: 'invalidClientID',
+            clientSecret: 'invalidClientSecret',
         })
     })
 })
