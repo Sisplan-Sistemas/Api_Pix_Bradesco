@@ -14,7 +14,7 @@
   "cSpell.language": "en,pt_BR",
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": true
+    "source.fixAll.eslint": "explicit"
   },
   "editor.bracketPairColorization.enabled": true,
   "editor.guides.bracketPairs": "active"

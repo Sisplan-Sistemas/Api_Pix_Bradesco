@@ -1,6 +1,6 @@
 import axios, { AxiosError } from 'axios'
 
-import { ITAU_ENDPOINT, ITAU_TOKEN_ENDPOINT, ITAU_CERT } from '~/config/env'
+import { ITAU_ENDPOINT, ITAU_TOKEN_ENDPOINT } from '~/config/env'
 import { CreateChargeRequest } from './request'
 import { logger } from '~/common/logger'
 import path from 'path'
@@ -26,7 +26,7 @@ export const getAgent = () => {
 export const createCharge = async (token: string, payload: CreateChargeRequest): Promise<BasicReturn> => {
   try {
     const response = await axios({
-      method: 'POST',
+      method: 'post',
       url: `${ITAU_ENDPOINT}/v2/cob/`,
       headers: {
         Authorization: token
@@ -50,7 +50,7 @@ export const authenticateTokenItau = async ({ clientID, clientSecret }: ClientIn
   try {
     const credentials = Buffer.from(`${clientID}:${clientSecret}`).toString('base64')
     const response = await axios({
-      method: 'POST',
+      method: 'post',
       url: `${ITAU_TOKEN_ENDPOINT}/oauth/token`,
       headers: {
         Authorization: `Basic ${credentials}`,
