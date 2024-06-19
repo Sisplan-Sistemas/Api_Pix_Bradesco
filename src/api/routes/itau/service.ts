@@ -1,6 +1,6 @@
 import axios, { AxiosError } from 'axios'
 
-import { ITAU_ENDPOINT, ITAU_TOKEN_ENDPOINT } from '~/config/env'
+import { ITAU_ENDPOINT, ITAU_TOKEN_ENDPOINT, ITAU_KEY, ITAU_CERT } from '~/config/env'
 import { CreateChargeRequest } from './request'
 import { logger } from '~/common/logger'
 import path from 'path'
@@ -12,13 +12,15 @@ import { BasicReturn, ClientInfo } from '~/common/classes/types'
 import { RequisitionFailedError, ValidationError } from '~/common/classes/error'
 
 export const getAgent = () => {
-  const ITAU_CERT = process.env.ITAU_CERT
   if (!ITAU_CERT) throw new Error('Certificate not found')
+  if (!ITAU_KEY) throw new Error('Certificate not found')
 
   const certPath = path.join(__dirname, '..', '..', '..', '..', 'certs', ITAU_CERT)
+  const keyPath = path.join(__dirname, '..', '..', '..', '..', 'certs', ITAU_KEY)
 
   const cert = fs.readFileSync(certPath)
-  const agent = new https.Agent({ ca: cert })
+  const key = fs.readFileSync(keyPath)
+  const agent = new https.Agent({ cert: cert, key: key })
 
   return agent
 }
@@ -26,13 +28,13 @@ export const getAgent = () => {
 export const createCharge = async (token: string, payload: CreateChargeRequest): Promise<BasicReturn> => {
   try {
     const response = await axios({
-      method: 'post',
-      url: `${ITAU_ENDPOINT}/v2/cob/`,
+      method: 'POST',
+      url: `${ITAU_ENDPOINT}/v2/cob`,
       headers: {
         Authorization: token
       },
       httpsAgent: getAgent(),
-      data: payload
+      data: payload,
     })
 
     return response.data
@@ -48,17 +50,17 @@ export const createCharge = async (token: string, payload: CreateChargeRequest):
 
 export const authenticateTokenItau = async ({ clientID, clientSecret }: ClientInfo) => {
   try {
-    const credentials = Buffer.from(`${clientID}:${clientSecret}`).toString('base64')
     const response = await axios({
       method: 'post',
-      url: `${ITAU_TOKEN_ENDPOINT}/oauth/token`,
+      url: `${ITAU_TOKEN_ENDPOINT}`,
       headers: {
-        Authorization: `Basic ${credentials}`,
         'Content-Type': 'application/x-www-form-urlencoded'
       },
       httpsAgent: getAgent(),
       data: qs.stringify({
-        grant_type: 'client_credentials'
+        grant_type: 'client_credentials',
+        client_id: clientID,
+        client_secret: clientSecret
       })
     })
 
