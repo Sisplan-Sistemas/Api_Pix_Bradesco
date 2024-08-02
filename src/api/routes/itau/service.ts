@@ -44,7 +44,13 @@ export const createCharge = async (token: string, payload: CreateChargeRequest):
     if (errorResponse.response?.status === 401)
       throw new ValidationError(errorResponse.response?.data.error_description, errorResponse.response?.status)
 
-    throw new RequisitionFailedError(errorResponse.response?.data.detail, errorResponse.response?.status)
+    const retorno = errorResponse.response?.data.violacoes;
+    let listaRetorno: string = errorResponse.response?.data.detail + ' ';
+    for (let i = 0; i < retorno.length; i++) {
+      listaRetorno += 'propridade: ' + retorno[i].propriedade + ', valor: ' + retorno[i].valor + ', razao: ' + retorno[i].razao;
+    }
+
+    throw new RequisitionFailedError(listaRetorno, errorResponse.response?.status)
   }
 }
 
