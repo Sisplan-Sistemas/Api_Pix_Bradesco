@@ -1,38 +1,36 @@
-import axios, { AxiosError } from 'axios'
+import axios, { AxiosError, AxiosResponse } from 'axios'
 import fs from 'fs'
 import qs from 'qs'
 import path from 'path'
 import https from 'https'
 
-import { BRADESCO_CERT, BRADESCO_ENDPOINT } from '~/config/env'
-import { BradescoRetorno, ClientInfo } from '~/classes/types'
-import { BradescoCobrancaRequest, GetCobrançasQuery } from './request'
+import { SICOOB_AUTH_ENDPOINT, SICOOB_CERT, SICOOB_CERT_PASSPHRASE, SICOOB_ENDPOINT } from '~/config/env'
+import { BasicReturn } from '~/common/classes/types'
 import { logger } from '~/common/logger'
-import { RequisitionFailedError, ValidationError } from '~/classes/error'
+import { RequisitionFailedError, ValidationError } from '~/common/classes/error'
+import { BasicCreateChargeRequest, BasicGetChargesQuery } from '../../../common/classes/Pix/basicEntity.dto'
+import { Agent } from 'http'
 
-export const getAgent = (empresa: string) => {
-  if (!BRADESCO_CERT) throw new Error('Certificate not found')
+export const getAgent: (empresa: string) => Agent = (empresa: string) => {
+  if (!SICOOB_CERT) throw new Error('Certificate not found')
 
-  const certPath = path.join(__dirname, '..', '..', '..', '..', 'certs', empresa, BRADESCO_CERT)
+  const certPath = path.join(__dirname, '..', '..', '..', '..', 'certs', empresa, SICOOB_CERT)
   if (!fs.existsSync(certPath)) throw new Error(`Certificado não encontrado: ${certPath}`)
   const cert = fs.readFileSync(certPath)
-  const agent = new https.Agent({ pfx: cert, passphrase: '1234' })
+  const agent = new https.Agent({ pfx: cert, passphrase: SICOOB_CERT_PASSPHRASE })
 
   return agent
 }
 
-<<<<<<< Updated upstream
-export const createCharge = async (token: string, payload: BradescoCobrancaRequest): Promise<BradescoRetorno> => {
-=======
 export const createCharge = async (token: string, payload: BasicCreateChargeRequest, empresa: string): Promise<BasicReturn> => {
->>>>>>> Stashed changes
   try {
+    if (!payload.calendario) payload.calendario = { expiracao: 7200 }
+
     const response = await axios({
       method: 'POST',
-      url: `https://qrpix-h.bradesco.com.br/v2/cob-emv`,
+      url: `${SICOOB_ENDPOINT}/cob`,
       headers: {
-        Authorization: token,
-        'Content-Type': 'application/json'
+        Authorization: token
       },
       httpsAgent: getAgent(empresa),
       data: payload
@@ -41,32 +39,29 @@ export const createCharge = async (token: string, payload: BasicCreateChargeRequ
     return response.data
   } catch (error) {
     const errorResponse = error as AxiosError
+    const errorMensage = errorResponse.response?.data.detail.detail == undefined ? errorResponse.response?.data.detail : errorResponse.response?.data.detail.detail;
 
     if (errorResponse.response?.status === 401)
-      throw new ValidationError(errorResponse.response?.data.error_description, errorResponse.response?.status)
+      throw new ValidationError(errorResponse.response?.data.detail, errorResponse.response?.status)
 
-    throw new RequisitionFailedError(errorResponse.response?.data.detail, errorResponse.response?.status)
+    throw new RequisitionFailedError(errorMensage, errorResponse.response?.status)
   }
 }
 
-<<<<<<< Updated upstream
-export const authenticateTokenBradesco = async ({ clientID, clientSecret }: ClientInfo) => {
-=======
-export const authenticate = async ({ clientID, clientSecret }: ClientInfo, empresa: string) => {
->>>>>>> Stashed changes
-  const credentials = Buffer.from(`${clientID}:${clientSecret}`).toString('base64')
-
+export const authenticate = async (clientID: string, empresa: string): Promise<string> => {
   try {
-    const response = await axios({
+    const response: AxiosResponse<string> = await axios({
       method: 'POST',
-      url: `${BRADESCO_ENDPOINT}/oauth/token`,
+      url: SICOOB_AUTH_ENDPOINT,
       headers: {
-        Authorization: `Basic ${credentials}`,
         'Content-Type': 'application/x-www-form-urlencoded'
       },
       httpsAgent: getAgent(empresa),
       data: qs.stringify({
-        grant_type: 'client_credentials'
+        grant_type: 'client_credentials',
+        client_id: clientID,
+        scope:
+          'cob.read cob.write cobv.write cobv.read lotecobv.write lotecobv.read pix.write pix.read webhook.read webhook.write payloadlocation.write payloadlocation.read'
       })
     })
 
@@ -74,7 +69,6 @@ export const authenticate = async ({ clientID, clientSecret }: ClientInfo, empre
     return response.data
   } catch (error) {
     const errorResponse = error as AxiosError
-
     throw new ValidationError(errorResponse.response?.data.error_description, errorResponse.response?.status)
   }
 }
@@ -83,7 +77,7 @@ export const findOne = async (token: string, identifier: string, empresa: string
   try {
     const response = await axios({
       method: 'GET',
-      url: `${BRADESCO_ENDPOINT}/v2/cob/${identifier}`,
+      url: `${SICOOB_ENDPOINT}/cob/${identifier}`,
       headers: {
         Authorization: token
       },
@@ -102,15 +96,11 @@ export const findOne = async (token: string, identifier: string, empresa: string
   }
 }
 
-<<<<<<< Updated upstream
-export const findMany = async (token: string, queryParams: GetCobrançasQuery) => {
-=======
 export const findMany = async (token: string, queryParams: BasicGetChargesQuery, empresa: string) => {
->>>>>>> Stashed changes
   try {
     const response = await axios({
       method: 'GET',
-      url: `${BRADESCO_ENDPOINT}/v2/cob`,
+      url: `${SICOOB_ENDPOINT}/cob`,
       headers: {
         Authorization: token
       },
