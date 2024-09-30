@@ -11,12 +11,14 @@ import { BasicGetChargesQuery } from '~/common/classes/Pix/basicEntity.dto'
 import { BasicReturn, ClientInfo } from '~/common/classes/types'
 import { RequisitionFailedError, ValidationError } from '~/common/classes/error'
 
-export const getAgent = () => {
+export const getAgent = (empresa: string) => {
   if (!ITAU_CERT) throw new Error('Certificate not found')
   if (!ITAU_KEY) throw new Error('Certificate not found')
 
-  const certPath = path.join(__dirname, '..', '..', '..', '..', 'certs', ITAU_CERT)
-  const keyPath = path.join(__dirname, '..', '..', '..', '..', 'certs', ITAU_KEY)
+  const certPath = path.join(__dirname, '..', '..', '..', '..', 'certs', empresa, ITAU_CERT)
+  const keyPath = path.join(__dirname, '..', '..', '..', '..', 'certs', empresa, ITAU_KEY)
+  if (!fs.existsSync(certPath)) throw new Error(`Certificado não encontrado: ${certPath}`)
+  if (!fs.existsSync(keyPath)) throw new Error(`Chave não encontrada: ${keyPath}`)
 
   const cert = fs.readFileSync(certPath)
   const key = fs.readFileSync(keyPath)
@@ -25,7 +27,7 @@ export const getAgent = () => {
   return agent
 }
 
-export const createCharge = async (token: string, payload: CreateChargeRequest): Promise<BasicReturn> => {
+export const createCharge = async (token: string, payload: CreateChargeRequest, empresa: string): Promise<BasicReturn> => {
   try {
     const response = await axios({
       method: 'POST',
@@ -33,7 +35,7 @@ export const createCharge = async (token: string, payload: CreateChargeRequest):
       headers: {
         Authorization: token
       },
-      httpsAgent: getAgent(),
+      httpsAgent: getAgent(empresa),
       data: payload,
     })
 
@@ -54,7 +56,7 @@ export const createCharge = async (token: string, payload: CreateChargeRequest):
   }
 }
 
-export const authenticateTokenItau = async ({ clientID, clientSecret }: ClientInfo) => {
+export const authenticateTokenItau = async ({ clientID, clientSecret }: ClientInfo, empresa: string) => {
   try {
     const response = await axios({
       method: 'post',
@@ -62,7 +64,7 @@ export const authenticateTokenItau = async ({ clientID, clientSecret }: ClientIn
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       },
-      httpsAgent: getAgent(),
+      httpsAgent: getAgent(empresa),
       data: qs.stringify({
         grant_type: 'client_credentials',
         client_id: clientID,
@@ -79,7 +81,7 @@ export const authenticateTokenItau = async ({ clientID, clientSecret }: ClientIn
   }
 }
 
-export const findOne = async (token: string, identifier: string) => {
+export const findOne = async (token: string, identifier: string, empresa: string) => {
   try {
     const response = await axios({
       method: 'GET',
@@ -87,7 +89,7 @@ export const findOne = async (token: string, identifier: string) => {
       headers: {
         Authorization: token
       },
-      httpsAgent: getAgent()
+      httpsAgent: getAgent(empresa)
     })
 
     logger.info(`Found one charge with identifier ${identifier}`)
@@ -102,7 +104,7 @@ export const findOne = async (token: string, identifier: string) => {
   }
 }
 
-export const findMany = async (token: string, queryParams: BasicGetChargesQuery) => {
+export const findMany = async (token: string, queryParams: BasicGetChargesQuery, empresa: string) => {
   try {
     const response = await axios({
       method: 'GET',
@@ -110,7 +112,7 @@ export const findMany = async (token: string, queryParams: BasicGetChargesQuery)
       headers: {
         Authorization: token
       },
-      httpsAgent: getAgent(),
+      httpsAgent: getAgent(empresa),
       params: {
         inicio: queryParams.inicio.toISOString().split('.')[0] + 'Z',
         fim: queryParams.fim?.toISOString().split('.')[0] + 'Z' ?? ''

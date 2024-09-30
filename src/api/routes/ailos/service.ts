@@ -11,17 +11,18 @@ import { RequisitionFailedError, ValidationError } from '~/common/classes/error'
 import { BasicCreateChargeRequest, BasicGetChargesQuery } from '../../../common/classes/Pix/basicEntity.dto'
 import { Agent } from 'http'
 
-export const getAgent: () => Agent = () => {
+export const getAgent: (empresa: string) => Agent = (empresa: string) => {
   if (!AILOS_CERT) throw new Error('Certificate not found')
 
-  const certPath = path.join(__dirname, '..', '..', '..', '..', 'certs', AILOS_CERT)
+  const certPath = path.join(__dirname, '..', '..', '..', '..', 'certs', empresa, AILOS_CERT)
+  if (!fs.existsSync(certPath)) throw new Error(`Certificado não encontrado: ${certPath}`)
   const cert = fs.readFileSync(certPath)
   const agent = new https.Agent({ pfx: cert, passphrase: AILOS_CERT_PASSPHRASE })
 
   return agent
 }
 
-export const createCharge = async (token: string, payload: BasicCreateChargeRequest): Promise<BasicReturn> => {
+export const createCharge = async (token: string, payload: BasicCreateChargeRequest, empresa: string): Promise<BasicReturn> => {
   try {
     if (!payload.calendario) payload.calendario = { expiracao: 7200 }
 
@@ -31,7 +32,7 @@ export const createCharge = async (token: string, payload: BasicCreateChargeRequ
       headers: {
         Authorization: token
       },
-      httpsAgent: getAgent(),
+      httpsAgent: getAgent(empresa),
       data: payload
     })
 
@@ -52,7 +53,7 @@ export const createCharge = async (token: string, payload: BasicCreateChargeRequ
   }
 }
 
-export const authenticate = async (clientID: string, clientSecret: string): Promise<string> => {
+export const authenticate = async (clientID: string, clientSecret: string, empresa: string): Promise<string> => {
   try {
     const response: AxiosResponse<string> = await axios({
       method: 'POST',
@@ -60,7 +61,7 @@ export const authenticate = async (clientID: string, clientSecret: string): Prom
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       },
-      httpsAgent: getAgent(),
+      httpsAgent: getAgent(empresa),
       data: qs.stringify({
         Client_Id: clientID,
         Client_Secret: clientSecret,
@@ -82,7 +83,7 @@ export const authenticate = async (clientID: string, clientSecret: string): Prom
   }
 }
 
-export const findOne = async (token: string, identifier: string) => {
+export const findOne = async (token: string, identifier: string, empresa: string) => {
   try {
     const response = await axios({
       method: 'GET',
@@ -90,7 +91,7 @@ export const findOne = async (token: string, identifier: string) => {
       headers: {
         Authorization: token
       },
-      httpsAgent: getAgent()
+      httpsAgent: getAgent(empresa)
     })
 
     logger.info(`Found one charge with identifier ${identifier}`)
@@ -105,7 +106,7 @@ export const findOne = async (token: string, identifier: string) => {
   }
 }
 
-export const findQrCode = async (token: string, identifier: string) => {
+export const findQrCode = async (token: string, identifier: string, empresa: string) => {
   try {
     const response = await axios({
       method: 'GET',
@@ -113,7 +114,7 @@ export const findQrCode = async (token: string, identifier: string) => {
       headers: {
         Authorization: token
       },
-      httpsAgent: getAgent()
+      httpsAgent: getAgent(empresa)
     })
 
     logger.info(`Found one charge with identifier ${identifier}`)
@@ -128,7 +129,7 @@ export const findQrCode = async (token: string, identifier: string) => {
   }
 }
 
-export const findMany = async (token: string, queryParams: BasicGetChargesQuery) => {
+export const findMany = async (token: string, queryParams: BasicGetChargesQuery, empresa: string) => {
   try {
     const response = await axios({
       method: 'GET',
@@ -137,7 +138,7 @@ export const findMany = async (token: string, queryParams: BasicGetChargesQuery)
         Authorization: token
       },
       params: { inicio: queryParams.inicio, fim: queryParams.fim },
-      httpsAgent: getAgent()
+      httpsAgent: getAgent(empresa)
     })
 
     logger.info('Found  charges')
