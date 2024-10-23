@@ -4,7 +4,7 @@ import qs from 'qs'
 import path from 'path'
 import https from 'https'
 
-import { BRADESCO_CERT, BRADESCO_ENDPOINT } from '~/config/env'
+import { BRADESCO_CERT, BRADESCO_CERT_PASSPHRASE, BRADESCO_ENDPOINT } from '~/config/env'
 import { BasicReturn, ClientInfo } from '~/common/classes/types'
 import { logger } from '~/common/logger'
 import { RequisitionFailedError, ValidationError } from '~/common/classes/error'
@@ -16,7 +16,7 @@ export const getAgent = (empresa: string) => {
   const certPath = path.join(__dirname, '..', '..', '..', '..', 'certs', empresa, BRADESCO_CERT)
   if (!fs.existsSync(certPath)) throw new Error(`Certificado não encontrado: ${certPath}`)
   const cert = fs.readFileSync(certPath)
-  const agent = new https.Agent({ pfx: cert, passphrase: '1234' })
+  const agent = new https.Agent({ pfx: cert, passphrase: BRADESCO_CERT_PASSPHRASE })
 
   return agent
 }
@@ -25,7 +25,7 @@ export const createCharge = async (token: string, payload: BasicCreateChargeRequ
   try {
     const response = await axios({
       method: 'POST',
-      url: `https://qrpix-h.bradesco.com.br/v2/cob-emv`,
+      url: `${BRADESCO_ENDPOINT}/v2/cob-emv`,
       headers: {
         Authorization: token,
         'Content-Type': 'application/json'
@@ -51,7 +51,7 @@ export const authenticate = async ({ clientID, clientSecret }: ClientInfo, empre
   try {
     const response = await axios({
       method: 'POST',
-      url: `${BRADESCO_ENDPOINT}/oauth/token`,
+      url: `${BRADESCO_ENDPOINT}/auth/server/oauth/token`,
       headers: {
         Authorization: `Basic ${credentials}`,
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -67,7 +67,7 @@ export const authenticate = async ({ clientID, clientSecret }: ClientInfo, empre
   } catch (error) {
     const errorResponse = error as AxiosError
 
-    throw new ValidationError(errorResponse.response?.data.error_description, errorResponse.response?.status)
+    throw new ValidationError(errorResponse.response?.data.message, errorResponse.response?.status)
   }
 }
 
